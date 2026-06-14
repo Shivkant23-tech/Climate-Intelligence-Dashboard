@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Climate Intelligence Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Weather x Environment</p>
+          <h1>Climate Intelligence Dashboard</h1>
+        </div>
+        <div class="status-cluster" aria-label="Current model status">
+          <span class="status-pill" id="profileLabel">Urban basin</span>
+          <span class="status-pill" id="forecastLabel">Forecast standby</span>
+          <span class="status-pill subtle" id="dayCount">120 days</span>
+        </div>
+      </header>
+
+      <section class="workspace-grid" aria-label="Correlation dashboard">
+        <aside class="control-panel" aria-label="Scenario controls">
+          <div class="panel-heading">
+            <h2>Scenario</h2>
+            <button class="icon-button" id="resetButton" type="button" aria-label="Reset scenario" title="Reset scenario">
+              <span aria-hidden="true">&#8634;</span>
+            </button>
+          </div>
+
+          <label class="field">
+            <span>Environment profile</span>
+            <select id="profileSelect">
+              <option value="urban">Urban basin</option>
+              <option value="coastal">Coastal wetland</option>
+              <option value="farm">Dry farmland</option>
+              <option value="forest">Forest edge</option>
+            </select>
+          </label>
+
+          <form class="forecast-form" id="forecastForm">
+            <div class="panel-heading">
+              <h2>Actual Forecast</h2>
+            </div>
+
+            <label class="field">
+              <span>City prompt</span>
+              <input id="cityInput" type="search" autocomplete="off" placeholder="Delhi, India" value="Delhi">
+            </label>
+
+            <label class="field">
+              <span>Country</span>
+              <select id="countrySelect">
+                <option value="">Auto detect</option>
+                <option value="IN" selected>India</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="JP">Japan</option>
+                <option value="AU">Australia</option>
+                <option value="BR">Brazil</option>
+                <option value="ZA">South Africa</option>
+                <option value="DE">Germany</option>
+                <option value="CA">Canada</option>
+                <option value="AE">United Arab Emirates</option>
+                <option value="SG">Singapore</option>
+              </select>
+            </label>
+
+            <div class="action-row">
+              <button class="primary-button" type="submit">Search</button>
+              <button class="secondary-button" id="applyForecastButton" type="button" disabled>Use Forecast</button>
+            </div>
+
+            <p class="forecast-status" id="forecastStatus">Ready for city forecast</p>
+          </form>
+
+          <div class="segmented" role="group" aria-label="Season pattern">
+            <button class="segment active" type="button" data-season="summer">Summer</button>
+            <button class="segment" type="button" data-season="monsoon">Monsoon</button>
+            <button class="segment" type="button" data-season="winter">Winter</button>
+          </div>
+
+          <label class="slider-field">
+            <span>Temperature offset</span>
+            <output id="tempOutput">+2.0&deg;C</output>
+            <input id="tempOffset" type="range" min="-4" max="8" step="0.5" value="2">
+          </label>
+
+          <label class="slider-field">
+            <span>Rainfall pattern</span>
+            <output id="rainOutput">56%</output>
+            <input id="rainfall" type="range" min="5" max="100" step="1" value="56">
+          </label>
+
+          <label class="slider-field">
+            <span>Tree cover</span>
+            <output id="treeOutput">24%</output>
+            <input id="treeCover" type="range" min="2" max="88" step="1" value="24">
+          </label>
+
+          <label class="slider-field">
+            <span>Traffic emissions</span>
+            <output id="trafficOutput">68%</output>
+            <input id="traffic" type="range" min="0" max="100" step="1" value="68">
+          </label>
+
+          <label class="slider-field">
+            <span>Soil permeability</span>
+            <output id="soilOutput">32%</output>
+            <input id="soil" type="range" min="0" max="100" step="1" value="32">
+          </label>
+        </aside>
+
+        <section class="main-panel">
+          <section class="forecast-panel" aria-labelledby="forecastTitle">
+            <div class="panel-heading">
+              <div>
+                <h2 id="forecastTitle">City Weather Forecast</h2>
+                <p id="forecastPlace">Delhi, India</p>
+              </div>
+              <span class="legend-chip" id="forecastSource">Sample</span>
+            </div>
+
+            <div class="forecast-grid" aria-label="Forecast readings">
+              <article class="weather-card">
+                <span>Temperature</span>
+                <strong id="forecastTemp">--</strong>
+                <small id="forecastCondition">Waiting</small>
+              </article>
+              <article class="weather-card">
+                <span>Humidity</span>
+                <strong id="forecastHumidity">--</strong>
+                <small>Relative humidity</small>
+              </article>
+              <article class="weather-card">
+                <span>Rain chance</span>
+                <strong id="forecastRain">--</strong>
+                <small id="forecastRainNote">7-day peak</small>
+              </article>
+              <article class="weather-card">
+                <span>Wind</span>
+                <strong id="forecastWind">--</strong>
+                <small>10 m speed</small>
+              </article>
+            </div>
+
+            <div class="daily-strip" id="dailyStrip" aria-label="Seven day forecast"></div>
+
+            <section class="heatmap-panel" aria-labelledby="forecastHeatmapTitle">
+              <div class="panel-heading compact">
+                <div>
+                  <h2 id="forecastHeatmapTitle">Forecast Heatmap</h2>
+                  <p>Daily intensity for temperature, rain, wind, and weather stress</p>
+                </div>
+              </div>
+              <div id="forecastHeatmap" class="forecast-heatmap" role="img" aria-label="Seven day weather heatmap"></div>
+            </section>
+          </section>
+
+          <div class="summary-strip" aria-label="Environmental scores">
+            <article class="score-card">
+              <span class="score-label">Heat stress</span>
+              <strong id="heatScore">0</strong>
+              <small id="heatTrend">Stable</small>
+            </article>
+            <article class="score-card">
+              <span class="score-label">Air pressure</span>
+              <strong id="airScore">0</strong>
+              <small id="airTrend">Stable</small>
+            </article>
+            <article class="score-card">
+              <span class="score-label">Runoff risk</span>
+              <strong id="runoffScore">0</strong>
+              <small id="runoffTrend">Stable</small>
+            </article>
+            <article class="score-card">
+              <span class="score-label">Habitat comfort</span>
+              <strong id="habitatScore">0</strong>
+              <small id="habitatTrend">Stable</small>
+            </article>
+          </div>
+
+          <div class="visual-grid">
+            <section class="chart-panel wide" aria-labelledby="matrixTitle">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="matrixTitle">Correlation Matrix</h2>
+                  <p>Weather drivers against environmental responses</p>
+                </div>
+                <span class="legend-chip">-1 to +1</span>
+              </div>
+              <div id="matrix" class="matrix" role="img" aria-label="Correlation matrix heat map"></div>
+            </section>
+
+            <section class="chart-panel" aria-labelledby="scatterTitle">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="scatterTitle">Impact Cloud</h2>
+                  <p>Daily weather stress vs ecosystem stress</p>
+                </div>
+              </div>
+              <canvas id="scatterCanvas" width="640" height="420" aria-label="Scatter chart"></canvas>
+            </section>
+
+            <section class="chart-panel" aria-labelledby="timelineTitle">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="timelineTitle">Season Pulse</h2>
+                  <p>Weather and environment through the modelled period</p>
+                </div>
+              </div>
+              <canvas id="lineCanvas" width="900" height="340" aria-label="Line chart"></canvas>
+            </section>
+
+            <section class="chart-panel insight-panel" aria-labelledby="insightTitle">
+              <div class="panel-heading">
+                <div>
+                  <h2 id="insightTitle">Strongest Signal</h2>
+                  <p id="signalSubtitle">Calculating relationship strength</p>
+                </div>
+              </div>
+              <div class="signal-meter">
+                <div id="signalFill"></div>
+              </div>
+              <p id="signalText" class="insight-text"></p>
+              <div class="mini-map" aria-hidden="true">
+                <div class="sun"></div>
+                <div class="cloud"></div>
+                <div class="terrain">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
